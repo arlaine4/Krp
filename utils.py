@@ -12,21 +12,27 @@ def parse_line(line):
     """
     tmp = None
     res = None
-    tmp = [i.replace('\n', '') for i in line.split(':')]
+    line = line.replace('\n', '')
+    tmp = [i for i in line.split(':')]
     tmp.pop(tmp.index('')) if '' in tmp else tmp
-    if '(' not in line:
+    if '(' not in line: #Parsing for stock
         if tmp[0].isalpha() and tmp[1].isdecimal() or\
                 tmp[0].replace('_', '').isalpha() and tmp[1].isdecimal():
             res = parsing.Stock(tmp[0], tmp[1])
         else:
             res = 'Error'
-    elif 'optimize:' in line:
+    elif 'optimize:' in line: #Parsing for optimize
+        if tmp[-1].isdigit():
+            sys.exit("You can't specify a delay for an optimize element, error with \033[4m{}\033[0m"
+                    .format(line))
         tmp = str(tmp[1]).replace('(', '').replace(')', '')
         res = parsing.Optimize(tmp.split(';'))
-    else:
-        tmp = [i.replace('\n', '').replace(')', '') for i in line.split('(')]
+    elif tmp[-1].isdigit(): #Parsing for process
+        tmp = [i.replace(')', '') for i in line.split('(')]
         name, need, result, delay = split_need_result_delay(tmp, line)
         res = parsing.Process(name, build_process_dic(need), build_process_dic(result), delay)
+    elif not tmp[-1].isdigit(): #Invalid
+        sys.exit("Error with \033[4m{}\033[0m, invalid element.".format(line))
     return res
 
 
