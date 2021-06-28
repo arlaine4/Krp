@@ -27,7 +27,9 @@ class Parser:
                 print("Skipping empty line") if self.debug else 0
                 continue
             else:
+                print("line: ", line)
                 curr_line = utils.parse_line(line)
+                print("parse_line: ", curr_line)
                 self.fill_parser_lists(curr_line)
                 print(curr_line) if self.debug else 0
 
