@@ -5,6 +5,11 @@ import parsing
 from copy import deepcopy
 
 def parse_line(line):
+    """
+    Method used to parse a line and extract the corresponding elem
+    res -> Class instance, either Stock, Process or Optimize
+           every instance is filled with the corresponding params
+    """
     tmp = None
     res = None
     tmp = [i.replace('\n', '') for i in line.split(':')]
@@ -19,52 +24,67 @@ def parse_line(line):
         tmp = str(tmp[1]).replace('(', '').replace(')', '')
         res = parsing.Optimize(tmp.split(';'))
     else:
-        name = tmp[0]
-        tmp.pop(0)
-        delay = tmp[-1]
-        tmp.pop(-1)
-        if check_comma_inside_lst_process(tmp):
-            tmp = reshape_process_info_before_dic(tmp)
-        res = parsing.Process(name, build_process_dictionnary(tmp), delay)
+        tmp = [i.replace('\n', '').replace(')', '') for i in line.split('(')]
+        name, need, result, delay = split_need_result_delay(tmp, line)
+        res = parsing.Process(name, build_process_dic(need), build_process_dic(result), delay)
     return res
 
 
-def check_comma_inside_lst_process(process):
-    for elem in process:
-        if ';' in elem:
-            return True
-    return False
+def split_need_result_delay(content, line):
+    """
+    Method used to split a list of string into the corresponding
+    elems to build a Process instance, we extract the name, the needs
+    and results for this process, and finally the delay needed to run this
+    process
+    """
+    name = content[0]
+    name = name.replace(':', '')
+    need = content[1].split(';')
+    need = [i.split(':') for i in need]
+    result = content[2].split(';')
+    result = [i.split(':') for i in result]
+    for i in range(len(result)):
+        if len(result[i]) > 2:
+            result[i].pop(-1)
+    delay = content[2].split(':')
+    try:
+        delay = int(delay[-1])
+    except:
+        sys.exit("Invalid type for delay in process : {}.".format(line))
+    if result[0][-2].isdigit() and result[0][-1].isdigit() and delay == int(result[0][-1]):
+        result = result[0][0:-1]
+    return name, need, result, delay
 
 
-def reshape_process_info_before_dic(process):
-    process = [i.replace('(', '').replace(')', '') for i in process]
-    print(process)
-    for i in range(len(process)):
-        print(process[i])
-        if ';' in process[i]:
-            tmp = process[i].split(';')
-            process.insert(i + 1, tmp[1])
-            process[i] = tmp[0]
-    return process
-
-
-def build_process_dictionnary(lst):
+def build_process_dic(lst):
+    """
+    Simple method to build a dictionnary for process need and results
+    from a list such as ['cake', '8', 'dollar', '20'] wich will result in
+                        {'cake' : 8, 'dollar' : 20}
+    """
     dico = {}
-    lst = [i.replace('(', '').replace(')', '') for i in lst]
-    for i in range(0, len(lst) , 2):
-        dico[lst[i]] = int(lst[i + 1])
+    i = 0
+    for i, elem in enumerate(lst):
+        if elem[-1] == '':
+            elem.pop(-1)
+        dico[elem[0]] = int(elem[1])
+        i += 1
     return dico
-
 
 def args_parsing():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_path', help='path to input file')
     parser.add_argument('delay', help='max delay for the program')
+    parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
     options = parser.parse_args()
     return options
 
 
 def check_valid_options(options):
+    """
+    Method used to check valid arguments, checking
+    path / delay params validity
+    """
     if not options.input_path:
         sys.exit('Missing input file.')
     if not options.delay:

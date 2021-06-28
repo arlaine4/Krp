@@ -1,27 +1,50 @@
 import utils
 
 class Parser:
+    """
+    Parsing Class, heart of the parsing is here.
+    -> stocks is a list of Stock class instances
+    -> content is a list of Process class instances
+    -> optimize is a list of Optimize class instances
+    -> delay corresponds to the maximal delay given as a parameter
+    """
     def __init__(self, options):
         self.path, self.delay = options.input_path, options.delay
         self.stocks = []
         self.content = []
+        self.optimize = []
+        self.debug = options.debug
         self.fd = open(self.path, 'r+')
 
     def main_parsing(self):
         curr_line = None
         for line in self.fd:
             if line[0] == '#':
-                print("Found a comment")
+                print("Found a comment") if self.debug else 0
                 continue
             else:
                 curr_line = utils.parse_line(line)
-                print("Found",curr_line)
+                self.fill_parser_lists(curr_line)
+                print(curr_line) if self.debug else 0
+
+    def fill_parser_lists(self, line):
+        if line is type(Process):
+            self.content.append(line)
+        elif line is type(Optimize):
+            self.optimize.append(line)
+        elif line is type(Stock):
+            self.stocks.append(line)
 
     def verify_parsing_content(self):
         pass
 
 
 class Stock:
+    """
+    Stock elem associated Class
+    -> name is obviously the stock name
+    -> qty is the quantity available for this stock
+    """
     def __init__(self, name, qty):
         self.name = name
         self.qty = qty
@@ -31,15 +54,29 @@ class Stock:
 
 
 class Process:
-    def __init__(self, name, content, delay):
+    """
+    Process elem associated Class
+    -> name is obviously the process name
+    -> need is a list of process (name & qty) needed to run this process
+    -> result is a list of resulting stocks after running the process
+    -> delay is the delay needed to run the process
+    """
+    def __init__(self, name, need, result, delay):
         self.name = name
-        self.content = content
+        self.need = need
+        self.result = result
         self.delay = delay
 
     def __str__(self):
-        return 'Process -> {} : {}, delay : {}'.format(self.name, self.content, self.delay)
+        return 'Process : {} - needs : {} -> result : {} - delay : {}'\
+                .format(self.name, self.need, self.result, self.delay)
 
 class Optimize:
+    """
+    Optimize elem associated Class
+    -> opti_elems is a list of name associated with what is
+        to optimize, like client and time
+    """
     def __init__(self, elems):
         self.opti_elems = [i for i in elems]
 
