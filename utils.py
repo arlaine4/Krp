@@ -18,7 +18,7 @@ def parse_line(line):
     if '(' not in line: #Parsing for stock
         if tmp[0].isalpha() and tmp[1].isdecimal() or\
                 tmp[0].replace('_', '').isalpha() and tmp[1].isdecimal():
-            res = parsing.Stock(tmp[0], tmp[1])
+            res = parsing.Stock(tmp[0], int(tmp[1]))
         else:
             res = 'Error'
     elif 'optimize:' in line: #Parsing for optimize

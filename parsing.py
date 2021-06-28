@@ -27,11 +27,10 @@ class Parser:
                 print("Skipping empty line") if self.debug else 0
                 continue
             else:
-                print("line: ", line)
                 curr_line = utils.parse_line(line)
-                print("parse_line: ", curr_line)
                 self.fill_parser_lists(curr_line)
                 print(curr_line) if self.debug else 0
+        self.fd = self.fd.close()
 
     def fill_parser_lists(self, line):
         if type(line) is Process:
@@ -40,6 +39,7 @@ class Parser:
             self.optimize.append(line)
         elif type(line) is Stock:
             self.stocks.append(line)
+
 
     def verify_parsing_content(self):
         if not self.optimize:

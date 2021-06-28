@@ -6,7 +6,6 @@ import solver
 if __name__ == "__main__":
     # Parsing of CLI arguments
     options = utils.args_parsing()
-    print(options)
 
     # Parsing of configuration file
     parser = parsing.Parser(options)
