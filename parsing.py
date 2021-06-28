@@ -1,4 +1,5 @@
 import utils
+import sys
 
 class Parser:
     """
@@ -31,16 +32,23 @@ class Parser:
                 print(curr_line) if self.debug else 0
 
     def fill_parser_lists(self, line):
-        if line is type(Process):
+        if type(line) is Process:
             self.content.append(line)
-        elif line is type(Optimize):
+        elif type(line) is Optimize:
             self.optimize.append(line)
-        elif line is type(Stock):
+        elif type(line) is Stock:
             self.stocks.append(line)
 
     def verify_parsing_content(self):
-        pass
-
+        if not self.optimize:
+            sys.exit("Missing optimize content.")
+        elif not self.stocks:
+            sys.exit("Missing initial stocks.")
+        elif not self.content:
+            sys.exit("No process detected inside {}, please provide at least one".format(self.path))
+        #Check if what need to be optimized is indeed inside at least one process and is accesible
+        #like if the process never gets called because of stocks that can never be filled, then
+        #the optimize values are not valid.
 
 class Stock:
     """
