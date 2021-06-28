@@ -22,6 +22,9 @@ class Parser:
             if line[0] == '#':
                 print("Found a comment") if self.debug else 0
                 continue
+            elif len(line) == 1 and line[0] == '\n':
+                print("Skipping empty line") if self.debug else 0
+                continue
             else:
                 curr_line = utils.parse_line(line)
                 self.fill_parser_lists(curr_line)

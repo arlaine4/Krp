@@ -1,0 +1,9 @@
+#comment
+euro:10
+#
+#
+buy_pasta:(euro:2):(pasta:1):5
+buy_egg:(euro:4):(egg:1):10
+make_carbonara:(euro:4;pasta:1;egg:1):(carbonara:1):30
+
+optimize:(time;carbonara)
