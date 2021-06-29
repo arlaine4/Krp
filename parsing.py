@@ -65,12 +65,15 @@ class Stock:
     def __str__(self):
         return 'Stock -> {} : {}'.format(self.name, self.qty)
 
+    def __eq__(self, other):
+        return self.name == other.name and self.qty == other.qty
+
 
 class Process:
     """
     Process elem associated Class
     -> name is obviously the process name
-    -> need is a list of process (name & qty) needed to run this process
+    -> need is a list of stocks (name & qty) needed to run this process
     -> result is a list of resulting stocks after running the process
     -> delay is the delay needed to run the process
     """
@@ -83,6 +86,12 @@ class Process:
     def __str__(self):
         return 'Process : {} - needs : {} -> result : {} - delay : {}'\
                 .format(self.name, self.need, self.result, self.delay)
+        
+    def __eq__(self, other):
+        return self.name == other.name and \
+            self.delay == other.delay and \
+            self.need == other.need and \
+            self.result == other.result
 
 class Optimize:
     """
@@ -95,3 +104,6 @@ class Optimize:
 
     def __str__(self):
         return 'Optimize -> {}'.format(self.opti_elems)
+    
+    def __eq__(self, other):
+        return self.opti_elems == other.opti_elems
