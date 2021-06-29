@@ -24,6 +24,7 @@ class TestParsing(unittest.TestCase):
 
     def test_stock(self):
         self.assertEqual(self.parser.stocks[0].name, 'clock')
+        self.assertEqual(self.parser.stocks[0].qty, 1)
     
     def test_process(self):
         self.assertEqual(self.parser.content[0].name, 'make_sec')
