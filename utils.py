@@ -45,21 +45,42 @@ def split_need_result_delay(content, line):
     """
     name = content[0]
     name = name.replace(':', '')
-    need = content[1].split(';')
-    need = [i.split(':') for i in need]
-    result = content[2].split(';')
-    result = [i.split(':') for i in result]
+    if len(content) == 3: # If we have both needs and result
+        need = content[1].split(';')
+        need = [i.split(':') for i in need]
+        result = content[2].split(';')
+        result = [i.split(':') for i in result]
+    #-----------------------------------------------------------#
+    #       Rework to handle missing need or result             #
+    elif len(content) == 2: # If we are missing needs or result
+        if check_no_need_or_result(content[0]) == "result":
+            need = []
+            result = content[1].split(';')
+            result = [i.split(':') for i in result]
+        elif check_no_need_or_result(content[0]) == "need":
+            result = []
+            need = content[1].split(';')
+            need = [i.split(':') for i in need]
+    #                                                           #
+    #-----------------------------------------------------------#
     for i in range(len(result)):
         if len(result[i]) > 2:
             result[i].pop(-1)
-    delay = content[2].split(':')
+    delay = content[2].split(':') if len(content) == 3 else content[1].split(':')
     try:
         delay = int(delay[-1])
     except:
         sys.exit("Invalid type for delay in process : {}.".format(line))
-    if result[0][-2].isdigit() and result[0][-1].isdigit() and delay == int(result[0][-1]):
+    if len(result) != 0 and result[0][-2].isdigit() and result[0][-1].isdigit() and delay == int(result[0][-1]):
         result = result[0][0:-1]
     return name, need, result, delay
+
+
+def check_no_need_or_result(content):
+    if content.count(':') == 2:
+        return 'result'
+    else:
+        return 'need'
 
 
 def build_process_dic(lst):
@@ -77,6 +98,7 @@ def build_process_dic(lst):
         i += 1
     return dico
 
+
 def is_valid_file(path):
     """
     Method passed in argparse to check if the input file is valid
@@ -84,6 +106,7 @@ def is_valid_file(path):
     if not os.path.isfile(path):
         raise argparse.ArgumentTypeError("{0} is not a valid file".format(path))
     return path
+
 
 def args_parsing():
     parser = argparse.ArgumentParser()
