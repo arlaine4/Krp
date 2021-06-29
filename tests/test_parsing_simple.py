@@ -23,20 +23,20 @@ class TestParsing(unittest.TestCase):
         self.assertEqual(len(self.parser.optimize), 1)
 
     def test_process(self):
-        self.assertEqual(self.parser.content[0].name, 'achat_materiel')
-        self.assertEqual(self.parser.content[0].need, {'euro' : 8})
-        self.assertEqual(self.parser.content[0].result, {'materiel' : 1})
-        self.assertEqual(self.parser.content[0].delay, 10)
+        self.assertEqual(self.parser.content['achat_materiel'].name, 'achat_materiel')
+        self.assertEqual(self.parser.content['achat_materiel'].need, {'euro' : 8})
+        self.assertEqual(self.parser.content['achat_materiel'].result, {'materiel' : 1})
+        self.assertEqual(self.parser.content['achat_materiel'].delay, 10)
 
-        self.assertEqual(self.parser.content[1].name, 'realisation_produit')
-        self.assertEqual(self.parser.content[1].need, {'materiel' : 1})
-        self.assertEqual(self.parser.content[1].result, {'produit' : 1})
-        self.assertEqual(self.parser.content[1].delay, 30)
+        self.assertEqual(self.parser.content['realisation_produit'].name, 'realisation_produit')
+        self.assertEqual(self.parser.content['realisation_produit'].need, {'materiel' : 1})
+        self.assertEqual(self.parser.content['realisation_produit'].result, {'produit' : 1})
+        self.assertEqual(self.parser.content['realisation_produit'].delay, 30)
 
-        self.assertEqual(self.parser.content[2].name, 'livraison')
-        self.assertEqual(self.parser.content[2].need, {'produit' : 1})
-        self.assertEqual(self.parser.content[2].result, {'client_content' : 1})
-        self.assertEqual(self.parser.content[2].delay, 20)
+        self.assertEqual(self.parser.content['livraison'].name, 'livraison')
+        self.assertEqual(self.parser.content['livraison'].need, {'produit' : 1})
+        self.assertEqual(self.parser.content['livraison'].result, {'client_content' : 1})
+        self.assertEqual(self.parser.content['livraison'].delay, 20)
 
     def test_optimize(self):
         self.assertEqual(self.parser.optimize[0].opti_elems, ['time', 'client_content'])

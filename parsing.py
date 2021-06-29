@@ -11,8 +11,8 @@ class Parser:
     """
     def __init__(self, options):
         self.path, self.delay = options.input_path, options.delay
-        self.stocks = []
-        self.content = []
+        self.stocks = {}
+        self.content = {}
         self.optimize = []
         self.debug = options.debug
         self.fd = open(self.path, 'r+')
@@ -34,11 +34,11 @@ class Parser:
 
     def fill_parser_lists(self, line):
         if type(line) is Process:
-            self.content.append(line)
+            self.content[line.name] = line
         elif type(line) is Optimize:
             self.optimize.append(line)
         elif type(line) is Stock:
-            self.stocks.append(line)
+            self.stocks[line.name] = line
 
 
     def verify_parsing_content(self):

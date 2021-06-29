@@ -5,35 +5,22 @@ sys.path.append(parentdir)
 
 import unittest
 import utils
+from parsing import Stock, Process, Optimize
 
 class TestUtils(unittest.TestCase):
     
-    def setup(self):
-        options = {
-            "delay": 1,
-            "input_path": "ressources/ikea",
-            "debug": False
-        }
-        self.parsing_test = Parser(options)
+    def setUp(self):
+        pass
 
-        self.comment_line = "# This is a comment"
-        self.valid_stock_line = "stock:1"
-        self.valid_process_line = "process:(input:1):(output:1):1"
-        self.valid_optimize_line = "optimize:(time;stock)"
+    def test_parse_line_valid_stock(self):
+        self.assertEqual(utils.parse_line("test:1"), Stock("test", 1))
+    
+    def test_parse_line_invalid_stock(self):
+        with self.assertRaises(SystemExit) as e:
+            utils.parse_line("test::1")
+        self.assertEqual(e.exception.code, 0)
 
-    def test_parse_line(self):
         
-        self.assertEqual(utils.parse_line(self.valid_stock_line).__str__, "Stock -> stock : 1")
-        # with self.assertRaises(ValueError):
-        #     utils.parse_line()
-
-    def test_split_need_result_delay(self):
-        pass
-        # with self.assertRaises(ValueError):
-        #     utils.split_need_result_delay()
-
-    def build_process_dic(self):
-        pass
 
 
 if __name__ == '__name__':
