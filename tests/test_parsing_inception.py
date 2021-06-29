@@ -82,6 +82,8 @@ class TestParsing(unittest.TestCase):
         self.assertEqual(self.parser.content[10].result, {'clock' : 1})
         self.assertEqual(self.parser.content[10].delay, 60)
 
+    def test_optimize(self):
+        self.assertEqual(self.parser.optimize[0].opti_elems, ['year'])
 
 
 if __name__ == '__main__':
