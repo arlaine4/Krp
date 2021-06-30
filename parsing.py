@@ -75,7 +75,7 @@ class Stock:
         self.qty = qty
 
     def __str__(self):
-        return 'Stock -> {} : {}'.format(self.name, self.qty)
+        return '\033[1mStock\033[0m -> \033[38;5;155m{}\033[0m : {}'.format(self.name, self.qty)
 
     def __eq__(self, other):
         return self.name == other.name and self.qty == other.qty
@@ -96,7 +96,7 @@ class Process:
         self.delay = delay
 
     def __str__(self):
-        return '\033[38;5;155m{}\033[0m - \033[1mneeds\033[0m : {} -> \033[1mresult\033[0m : {} - \033[1mdelay\033[0m : {}'\
+        return '\033[38;5;74m{}\033[0m - \033[1mneeds\033[0m : {} -> \033[1mresult\033[0m : {} - \033[1mdelay\033[0m : {}'\
                 .format(self.name, self.need, self.result, self.delay)
         
     def __eq__(self, other):
@@ -115,7 +115,7 @@ class Optimize:
         self.opti_elems = [i for i in elems]
 
     def __str__(self):
-        return 'Optimize -> {}'.format(self.opti_elems)
+        return '\033[1mOptimize\033[0m -> \033[38;5;218m{}\033[0m'.format(str(self.opti_elems).replace('[', '').replace(']', ''))
     
     def __eq__(self, other):
         return self.opti_elems == other.opti_elems
