@@ -112,7 +112,7 @@ def args_parsing():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_path', type=is_valid_file, help='path to input file')
     parser.add_argument('delay', type=int, help='max delay for the program (delay >= 1)')
-    parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
+    parser.add_argument('-v', '--verbose', type=int, help='verbose mode, 1 for parsing and 2 for process verbose')
     options = parser.parse_args()
     if options.delay < 1:
         parser.error("Minimum delay is 1")
