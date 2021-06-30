@@ -7,6 +7,7 @@ from copy import deepcopy
 def parse_line(line):
     """
     Method used to parse a line and extract the corresponding elem
+    tmp -> Used for splitting the line and removing some junk from the list
     res -> Class instance, either Stock, Process or Optimize
            every instance is filled with the corresponding params
     """
@@ -15,23 +16,27 @@ def parse_line(line):
     line = line.replace('\n', '')
     tmp = [i for i in line.split(':')]
     tmp.pop(tmp.index('')) if '' in tmp else tmp
-    if '(' not in line: #Parsing for stock
+    # Parsing for stock elem
+    if '(' not in line:
         if tmp[0].isalpha() and tmp[1].isdecimal() or\
                 tmp[0].replace('_', '').isalpha() and tmp[1].isdecimal():
             res = parsing.Stock(tmp[0], int(tmp[1]))
         else:
             res = 'Error'
-    elif 'optimize:' in line: #Parsing for optimize
+    # Parsing for optimize elem
+    elif 'optimize:' in line:
         if tmp[-1].isdigit():
             sys.exit("You can't specify a delay for an optimize element, error with \033[4m{}\033[0m"
                     .format(line))
         tmp = str(tmp[1]).replace('(', '').replace(')', '')
         res = parsing.Optimize(tmp.split(';'))
-    elif tmp[-1].isdigit(): #Parsing for process
+    # Parsing for process elem
+    elif tmp[-1].isdigit():
         tmp = [i.replace(')', '') for i in line.split('(')]
         name, need, result, delay = split_need_result_delay(tmp, line)
         res = parsing.Process(name, build_process_dic(need), build_process_dic(result), delay)
-    elif not tmp[-1].isdigit(): #Invalid
+    # Invalid elem
+    elif not tmp[-1].isdigit():
         sys.exit("Error with \033[4m{}\033[0m, invalid element.".format(line))
     return res
 
@@ -45,24 +50,26 @@ def split_need_result_delay(content, line):
     """
     name = content[0]
     name = name.replace(':', '')
-    if len(content) == 3: # If we have both needs and result
+    # len(content) == 3 is when we have both needs and result for the process
+    if len(content) == 3:
         need = content[1].split(';')
         need = [i.split(':') for i in need]
         result = content[2].split(';')
         result = [i.split(':') for i in result]
-    #-----------------------------------------------------------#
-    #       Rework to handle missing need or result             #
-    elif len(content) == 2: # If we are missing needs or result
+    # len(content) == 2 is when we are either missing needs or result for the process
+    # We want to create an empty need if we are missing it, same for result
+    elif len(content) == 2:
         if check_no_need_or_result(content[0]) == "result":
-            need = []
-            result = content[1].split(';')
-            result = [i.split(':') for i in result]
+            need, result = split_need_result(content[1], 'result')
+            #need = []
+            #result = content[1].split(';')
+            #result = [i.split(':') for i in result]
         elif check_no_need_or_result(content[0]) == "need":
-            result = []
-            need = content[1].split(';')
-            need = [i.split(':') for i in need]
-    #                                                           #
-    #-----------------------------------------------------------#
+            need, result = split_need_result(content[1], 'need')
+            #result = []
+            #need = content[1].split(';')
+            #need = [i.split(':') for i in need]
+    # Just removing unwanted junk at the end of the result list if there is any
     for i in range(len(result)):
         if len(result[i]) > 2:
             result[i].pop(-1)
@@ -76,7 +83,25 @@ def split_need_result_delay(content, line):
     return name, need, result, delay
 
 
+def split_need_result(content, ret=''):
+    if ret == 'result':
+        need = []
+        result = content.split(';')
+        result = [i.split(':') for i in result]
+    elif ret == 'need':
+        result = []
+        need = content.split(';')
+        need = [i.split(':') for i in need]
+    return need, result
+
+
 def check_no_need_or_result(content):
+    """
+    Little method used when the len of content equals 2.
+    If the lenght isn't 3 it means that we are missing something,
+    either needs or result.
+    Here we just determine if the need or result is missing
+    """
     if content.count(':') == 2:
         return 'result'
     else:

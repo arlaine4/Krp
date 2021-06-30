@@ -7,14 +7,14 @@ import unittest
 import parsing as p
 
 class Options:
-    def __init__(self, delay, path, debug):
+    def __init__(self, delay, path, verbose):
         self.delay = delay
         self.input_path = path
-        self.debug = debug
+        self.verbose = verbose
 
 class TestParsing(unittest.TestCase): 
     def setUp(self):
-        self.parser = p.Parser(Options(1, 'resources/inception', False))
+        self.parser = p.Parser(Options(1, 'resources/inception', 0))
         self.parser.main_parsing()
 
     def test_len_parser_elems(self):

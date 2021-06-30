@@ -7,10 +7,10 @@ import unittest
 import parsing as p
 
 class Options:
-    def __init__(self, delay, path, debug):
+    def __init__(self, delay, path, verbose):
         self.delay = delay
         self.input_path = path
-        self.debug = debug
+        self.verbose = verbose
 
 class TestParsing(unittest.TestCase): 
     def setUp(self):

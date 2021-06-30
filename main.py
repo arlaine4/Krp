@@ -17,7 +17,7 @@ if __name__ == "__main__":
     graph.build_graph()
 
     # Debug graph
-    if parser.verbose == 2:
+    if parser.verbose is not None and parser.verbose >= 2:
         for stock, processes in graph.needs.items():
             print(f"\nProcesses that needs {stock}:")
             for process in processes:
