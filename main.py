@@ -2,6 +2,7 @@ import utils
 from parsing import Parser
 from graph import Graph
 from solver import Solver
+from simulation import Simulation
 
 if __name__ == "__main__":
     # Parsing of CLI arguments
@@ -19,13 +20,16 @@ if __name__ == "__main__":
     # Debug graph
     if parser.verbose is not None and parser.verbose >= 2:
         for stock, processes in graph.needs.items():
-            print(f"\nProcesses that needs {stock}:")
+            print(f"\nProcesses that \033[31mneeds\033[0m {stock}:")
             for process in processes:
                 print(f"{process}")
         for stock, processes in graph.produces.items():
-            print(f"\nProcesses that produces {stock}:")
+            print(f"\nProcesses that \033[32mproduces\033[0m {stock}:")
             for process in processes:
                 print(f"{process}")
+
+    simu = Simulation(options, graph)
+    simu.start_simulation()
 
 
     # Creating a list of possibles paths of processes (solutions) and their performances
