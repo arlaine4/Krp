@@ -13,7 +13,7 @@ if __name__ == "__main__":
     parser.main_parsing()
     parser.verify_parsing_content()
 
-    # Building a graph of processes
+    # Building a graph of processe
     graph = Graph(parser.content, parser.stocks, parser.optimize)
     graph.build_graph()
 

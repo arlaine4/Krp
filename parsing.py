@@ -60,6 +60,7 @@ class Parser:
             sys.exit("Missing initial stocks.")
         elif not self.content:
             sys.exit("No process detected inside {}, please provide at least one".format(self.path))
+        #Check if there is at most two optimize elems and if one of them is time
         #Check if what need to be optimized is indeed inside at least one process and is accesible
         #like if the process never gets called because of stocks that can never be filled, then
         #the optimize values are not valid.
@@ -112,6 +113,8 @@ class Optimize:
         to optimize, like client and time
     """
     def __init__(self, elems):
+       # if 'time' in elems:
+       #     elems.pop(elems.index('time'))
         self.opti_elems = [i for i in elems]
 
     def __str__(self):
