@@ -26,7 +26,6 @@ class Simulation:
 
     def define_max_delay(self, opti, options):
         if options.delay:
-            print(opti.opti_elems)
             if 'time' in opti.opti_elems:
                 index = opti.opti_elems.index('time')
                 self.start_needs[0] = opti.opti_elems[1] if index == 0 else opti.opti_elems[0]
@@ -59,6 +58,5 @@ class Simulation:
     def start_simulation(self):
         print("Keys results from processes : ", self.keys_res_p)
         print("Max Cycle : ", self.max_cycle)
-        print(self.start_needs)
         self.get_starting_stack_and_queue()
         self.recursive_stack_and_queue_update()
