@@ -6,6 +6,9 @@ __pycache__/
 # Vim recovery files
 *.swp
 
+# Vscode
+.vscode
+
 # C extensions
 *.so
 
@@ -139,3 +142,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Mac
+.DS_STORE

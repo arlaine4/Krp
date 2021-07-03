@@ -1,45 +1,7 @@
 import argparse
 import sys
 import os
-import parsing
 from copy import deepcopy
-
-def parse_line(line):
-    """
-    Method used to parse a line and extract the corresponding elem
-    tmp -> Used for splitting the line and removing some junk from the list
-    res -> Class instance, either Stock, Process or Optimize
-           every instance is filled with the corresponding params
-    """
-    tmp = None
-    res = None
-    line = line.replace('\n', '')
-    tmp = [i for i in line.split(':')]
-    tmp.pop(tmp.index('')) if '' in tmp else tmp
-    # Parsing for stock elem
-    if '(' not in line:
-        if tmp[0].isalpha() and tmp[1].isdecimal() or\
-                tmp[0].replace('_', '').isalpha() and tmp[1].isdecimal():
-            res = parsing.Stock(tmp[0], int(tmp[1]))
-        else:
-            res = 'Error'
-    # Parsing for optimize elem
-    elif 'optimize:' in line:
-        if tmp[-1].isdigit():
-            sys.exit("You can't specify a delay for an optimize element, error with \033[4m{}\033[0m"
-                    .format(line))
-        tmp = str(tmp[1]).replace('(', '').replace(')', '')
-        res = parsing.Optimize(tmp.split(';'))
-    # Parsing for process elem
-    elif tmp[-1].isdigit():
-        tmp = [i.replace(')', '') for i in line.split('(')]
-        name, need, result, delay = split_need_result_delay(tmp, line)
-        res = parsing.Process(name, build_process_dic(need), build_process_dic(result), delay)
-    # Invalid elem
-    elif not tmp[-1].isdigit():
-        sys.exit("Error with \033[4m{}\033[0m, invalid element.".format(line))
-    return res
-
 
 def split_need_result_delay(content, line):
     """
@@ -134,10 +96,10 @@ def is_valid_file(path):
 
 
 def args_parsing():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog='krpsim')
     parser.add_argument('input_path', type=is_valid_file, help='path to input file')
     parser.add_argument('delay', type=int, help='max delay for the program (delay >= 1)')
-    parser.add_argument('-v', '--verbose', type=int, help='verbose mode, 1 for parsing and 2 for process verbose')
+    parser.add_argument('-v', '--verbose', type=int, default=0, help='verbose mode, 1 for parsing and 2 for process verbose')
     options = parser.parse_args()
     if options.delay < 1:
         parser.error("Minimum delay is 1")
