@@ -65,6 +65,8 @@ class Parser:
         #like if the process never gets called because of stocks that can never be filled, then
         #the optimize values are not valid.
 
+
+
 class Stock:
     """
     Stock elem associated Class
@@ -80,6 +82,9 @@ class Stock:
 
     def __eq__(self, other):
         return self.name == other.name and self.qty == other.qty
+
+    def __add_(self, other):
+        return self.qty + other.qty
 
 
 class Process:

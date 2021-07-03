@@ -1,4 +1,5 @@
 import utils
+import parsing
 from parsing import Parser
 from graph import Graph
 from solver import Solver
@@ -14,21 +15,21 @@ if __name__ == "__main__":
     parser.verify_parsing_content()
 
     # Building a graph of processe
-    graph = Graph(parser.content, parser.stocks, parser.optimize)
-    graph.build_graph()
+#    graph = Graph(parser.content, parser.stocks, parser.optimize)
+#    graph.build_graph()
 
     # Debug graph
-    if parser.verbose is not None and parser.verbose >= 2:
-        for stock, processes in graph.needs.items():
-            print(f"\nProcesses that \033[31mneeds\033[0m {stock}:")
-            for process in processes:
-                print(f"{process}")
-        for stock, processes in graph.produces.items():
-            print(f"\nProcesses that \033[32mproduces\033[0m {stock}:")
-            for process in processes:
-                print(f"{process}")
+#    if parser.verbose is not None and parser.verbose >= 2:
+#        for stock, processes in graph.needs.items():
+#            print(f"\nProcesses that \033[31mneeds\033[0m {stock}:")
+#            for process in processes:
+#                print(f"{process}")
+#        for stock, processes in graph.produces.items():
+#            print(f"\nProcesses that \033[32mproduces\033[0m {stock}:")
+#            for process in processes:
+#                print(f"{process}")
 
-    simu = Simulation(options, graph)
+    simu = Simulation(options, parser)
     simu.start_simulation()
 
 
