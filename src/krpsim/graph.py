@@ -98,6 +98,7 @@ class Node:
         return np \
             .array(np.meshgrid(*matrix)) \
             .transpose() \
+            .reshape(-1, len(matrix)) \
             .tolist()
 
 
