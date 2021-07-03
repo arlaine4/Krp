@@ -3,7 +3,7 @@ WORKDIR ?= .
 TESTDIR := $(WORKDIR)/tests
 SCRIPTDIR ?= $(WORKDIR)/scripts
 
-.PHONY: install run clean
+.PHONY: install clean
 
 install:
 	@python3 -m pip install -r requirements.txt
