@@ -10,6 +10,9 @@ from krpsim.parsing import Process
 T = TypeVar('T')
 Matrix = list[list[T]]
 
+COLOR_BLUE = '\033[38;5;74m'
+RESET_COLOR = '\033[0m'
+
 @dataclass
 class NodeElem:
     """
@@ -24,17 +27,21 @@ class NodeElem:
     @property
     def name(self) -> str:
         return self._name
-    
+
     @property
     def times(self) -> int:
         return self._times
-    
+
+    @name.setter
+    def name(self, value) -> None:
+        self._name = value
+
+    @times.setter
+    def times(self, value) -> None:
+        self._times = value
+
     def __str__(self) -> str:
         return f'[{self.name} * {self.times}]'
-        string: str = f'Depth\033[0m: {self.depth} \033[38;5;74mList\033[0m: '
-        for process in self.process_list:
-            string += f'{process} '
-        return string
 
 
 @dataclass
@@ -54,27 +61,45 @@ class Node:
     @property
     def process_list(self) -> dict[str, int]:
         return self._process_list
-    
+
     @property
     def stock(self) -> dict[str, int]:
         return self._stock
-    
+
     @property
     def depth(self) -> int:
         return self._depth
 
+    @process_list.setter
+    def process_list(self, value) -> None:
+        self._process_list = value
+
+    @stock.setter
+    def stock(self, value) -> None:
+        self._stock = value
+
+    @depth.setter
+    def depth(self, value) -> None:
+        self._depth = value
+
     def __str__(self) -> str:
-        string: str = f'Depth\033[0m: {self.depth} \033[38;5;74mList\033[0m: '
+        
+        string: str = f'{COLOR_BLUE}Processes{RESET_COLOR}: '
         for process in self.process_list:
-            string += f'[{process.name} * {process.times}] '
+            string += f'({process.name} * {process.times}) '
+        string += f'\n{COLOR_BLUE}Stocks{RESET_COLOR}: '
+        for name, qty in self.stock.items():
+            if qty != 0:
+                string += f'({name}: {qty}) '
+        string += f'\n{COLOR_BLUE}Depth{RESET_COLOR}: {self.depth}'
         return string
-    
+
     def __add__(self, other):
-        return Node([*self.process_list, *other.process_list], self.depth, self.stock)
-    
+        return Node([*self.process_list, *other.process_list], self.stock, self.depth)
+
     def __radd__(self, other):
         return self if other == 0 else self.__add__(other)
-    
+
     @staticmethod
     def combinations(matrix: Matrix) -> Matrix:
         """
@@ -96,11 +121,13 @@ class Node:
         [3, 4, 7],
         [3, 5, 7]])
         """
+
         return np \
             .array(np.meshgrid(*matrix)) \
-            .transpose() \
+            .T \
             .reshape(-1, len(matrix)) \
             .tolist()
+
 
 
 @dataclass
@@ -117,6 +144,7 @@ class Graph:
     _optimize: str
     _needs: dict[str, list[Process]] = field(default_factory=dict)
     _produces: dict[str, list[Process]] = field(default_factory=dict)
+    _paths: list[list[Node]] = field(default_factory=list)
 
     @property
     def process(self) -> dict[str, Process]:
@@ -137,7 +165,34 @@ class Graph:
     @property
     def produces(self) -> dict[str, list]:
         return self._produces
-
+    
+    @property
+    def paths(self) -> list[list[Node]]:
+        return self._paths
+    
+    @process.setter
+    def process(self, value) -> None:
+        self._process = value
+    
+    @stock.setter
+    def stock(self, value) -> None:
+        self._stock = value
+    
+    @optimize.setter
+    def optimize(self, value) -> None:
+        self._optimize = value
+    
+    @needs.setter
+    def needs(self, value) -> None:
+        self._needs = value
+    
+    @produces.setter
+    def produces(self, value) -> None:
+        self._produces = value
+    
+    @paths.setter
+    def paths(self, value) -> None:
+        self._paths = value
 
     def sort(self) -> None:
         """
@@ -160,13 +215,28 @@ class Graph:
                 self.produces.setdefault(stock, []).append(process)
                 self.stock.setdefault(stock, 0)
 
-    def get_root(self) -> Node:
+    def update_stocks(self, node: Node) -> None:
+        for process in node.process_list:
+            for need, qty in self.process[process.name].need.items():
+                node.stock[need] -= qty
+        return node
+
+    def stocks_available(self, node: Node) -> bool:
+        for node_elem in node.process_list:
+            for need, qty in self.process[node_elem.name].need.items():
+                if qty < self.process[node_elem.name].need[need]:
+                    return False
+        return True
+    
+    def get_root(self) -> list[Node]:
         """
         Get root nodes that produces the stock to optimize
         returns: a node with a list of process that produces the stock to optimize
         """
         process_list: list[NodeElem] = [NodeElem(p.name, 1) for p in self.produces[self.optimize]]
-        return Node(process_list, deepcopy(self.stock))
+        _node_list: list[Node] = [Node([process], deepcopy(self.stock)) for process in process_list]
+        root: list[Node] = [self.update_stocks(node) for node in _node_list]
+        return root
 
     def get_process_children(self, parent_process: NodeElem, depth: int, stock: dict[str, int]) -> list[Node]:
         """
@@ -178,7 +248,7 @@ class Graph:
         for need, qty in self.process[parent_process.name].need.items():
             if stock.get(need, 1) >= qty:
                 continue
-            matrices.append([NodeElem(p.name, ceil(qty / (p.result[need] + stock[need]))) for p in self.produces[need]])
+            matrices.append([NodeElem(p.name, ceil(qty / (p.result[need] + abs(stock[need])))) for p in self.produces[need]])
         combinations = Node.combinations(matrices)
         return [Node(lst, deepcopy(stock), depth + 1) for lst in combinations]
 
@@ -191,13 +261,23 @@ class Graph:
         """
         nodes_lists: Matrix = [self.get_process_children(process, parent.depth, parent.stock) for process in parent.process_list]
         nodes_combinations: Matrix = Node.combinations(nodes_lists)
-        children: list[Node] = [sum(nodes) for nodes in nodes_combinations]
+        _children: list[Node] = [sum(nodes) for nodes in nodes_combinations]
+        children: list[Node] = [self.update_stocks(node) for node in _children]
         return children
     
-    def depth_first_search(self, current: Node, visited: set[str]) -> None:
+    def depth_first_search(self, current: Node, path: list[Node]) -> None:
         """
         Perfoms DFS to find every sequence of process that will be stored in self.paths
         current: the current node to explore
-        visited: a set of visited processes
         """
-        pass
+        path.append(current)
+        for child in self.get_children(current):
+            if not self.stocks_available(child):
+                return self.depth_first_search(child, path)
+            self.paths.append(path)
+        return None
+
+    def start_dfs(self) -> None:
+        root = self.get_root()
+        for node in root:
+            self.depth_first_search(node, [])

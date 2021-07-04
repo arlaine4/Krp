@@ -23,21 +23,14 @@ if __name__ == '__main__':
     graph.build()
     graph.sort()
 
-    # Debug for graph
-    if options.verbose >= 2:
-        for stock, processes in graph.needs.items():
-            print(f"\nProcesses that \033[31mneeds\033[0m {stock}:")
-            for process in processes:
-                print(f"{process}")
-        for stock, processes in graph.produces.items():
-            print(f"\nProcesses that \033[32mproduces\033[0m {stock}:")
-            for process in processes:
-                print(f"{process}")
 
-    root = graph.get_root()
-    children = graph.get_children(root)
+    graph.start_dfs()
     if options.verbose >= 2:
-        print(root)
-        for node in children:
-            print(node)
+        for i, path in enumerate(graph.paths):
+            print(f'Path #{i}\n--------')
+            for j, node in enumerate(path):
+                print(f'Node #{j}')
+                print(node)
+            print('')
+        
 
