@@ -41,22 +41,110 @@ class Simulation:
             total += self.process[key].delay
         return total * len(keys)
 
-    def get_starting_stack_and_queue(self):
-        self.queue.append(self.start_needs)
-        self.stack.append(self.keys_res_p[self.start_needs[0]])
+    def available_stocks_for_process(self):
+        key = list(self.stack[-1].need.keys())
+        if key[0] in self.stocks and self.queue[-1][key[0]] <= self.stocks[key[0]].qty:
+            return True
+        return False
 
-    def recursive_stack_and_queue_update(self):
+    def order_queue_filling(self):
+        sub_queue = self.queue[-1]
+        print(sub_queue)
+        return
+
+    def one_queue_stack_update(self):
+        key = list(self.queue[-1].keys())
+        s = self.keys_res_p[key[0]]
+        self.stack.append(self.process[s[0]])
+        print("bon ta mere la print : ", self.stack[-1].need)
+        self.queue[0] = self.stack[-1].need
+        if len(self.queue[-1]) > 1:
+            self.order_queue_filling()
+
+    def recursive_stack_queue_update(self):
+        if not self.available_stocks_for_process():
+            self.one_queue_stack_update()
+           # key = list(self.queue[-1].keys())
+           # s = self.keys_res_p[key[0]]
+           # self.stack.append(self.process[s[0]])
+           # self.queue[0] = self.stack[-1].need
+           # key = list(self.queue[-1].keys())
+            #while self.queue[0][key[0]] != 0:
+            #    self.queue[0][key[0]] -= self.stack[-1].need[key[0]]
+            #    if self.queue[0][key[0]] == 0:
+            #        break
+            #    self.stack.append(self.process[s[0]])
+            print(self)
+            self.recursive_stack_queue_update()
+        else:
+            return
+
+    def start_simulation(self):
+        print("\n\nKeys results from processes : ", self.keys_res_p)
+        print("\n\nMax Cycle : ", self.max_cycle)
+        print("\n\nFirst needs : ", self.start_needs[0])
+
+        print("\n", self)
+        # Do a callback that updates the stocks everytime a process is added to the stack
+        key = self.keys_res_p[self.start_needs[0]]
+        self.stack.append(self.process[key[0]])
+        self.queue.append(self.stack[-1].need)
+        self.recursive_stack_queue_update()
+        for elem in self.stack:
+            print(elem)
+#        print(self)
+#
+#        key = list(self.queue[-1].keys())
+#        s = self.keys_res_p[key[0]]
+#        self.stack.append(self.process[s[0]])
+#        self.queue.append(self.stack[-1].need)
+#        print(self)
+#
+#        key = list(self.queue[-1].keys())
+#        s = self.keys_res_p[key[0]]
+#        self.stack.append(self.process[s[0]])
+#        self.queue.append(self.stack[-1].need)
+#        print(self)
+
+#        key = list(self.queue[0].keys())
+#        print(key[0], self.keys_res_p[key[0]])
+#        s = self.keys_res_p[key[0]]
+#        print(self.process, s[0])
+                
+#        self.stack.append(self.process[key[0]])
+#        self.queue.append(self.stack[-1].need)
+
+
+
+    """def recursive_stack_and_queue_update(self):
         if self.stop_recursion:
             return
         else:
-            print(self)
-            return
+            self.update_stack_and_queue(self.get_next_need())
+            if self.stop_recursion:
+                return
+            else:
+                return self.recursive_stack_and_queue_update()
             #add condition check le contenu de la queue, si elle est vide
             # on set self.stop_recursion a False et on arrete la recursion
-            # avec une stack remplie de process
+            # avec une stack remplie de process"""
 
-    def start_simulation(self):
-        print("Keys results from processes : ", self.keys_res_p)
-        print("Max Cycle : ", self.max_cycle)
-        self.get_starting_stack_and_queue()
-        self.recursive_stack_and_queue_update()
+    """def update_stack_and_queue(self, need=None):
+        if need is None:
+            try:
+                self.queue.append(self.start_needs)
+                key = self.keys_res_p[self.start_needs[0]]
+                self.stack.append(self.process[key[0]])
+                #del(self.queue[0])
+                self.stop_recursion = False
+            except:
+                self.stop_recursion = True
+        else:
+            try:
+                self.queue.append(need)
+                key = self.keys_res_p[need[0]]
+                self.stack.append(self.process[key[0]])
+                del(self.queue[0])
+                self.stop_recursion = False
+            except:
+                self.stop_recursion = True"""
