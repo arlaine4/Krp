@@ -1,12 +1,14 @@
 from math import ceil
 import numpy as np
 from dataclasses import dataclass, field
-from typing import Optional, Any, Generic, TypeVar
+from typing import Any, TypeVar
 from copy import deepcopy
 
 from krpsim.parsing import Process
 
+# Custom types
 T = TypeVar('T')
+Matrix = list[list[T]]
 
 @dataclass
 class NodeElem:
@@ -46,7 +48,6 @@ class Node:
 
     _process_list: list[NodeElem]
     _stock: dict[str, int]
-    _parent: Any = None
     _depth: int = 0
 
 
@@ -75,7 +76,7 @@ class Node:
         return self if other == 0 else self.__add__(other)
     
     @staticmethod
-    def combinations(matrix: list[list[Generic[T]]]) -> list[list[T]]:
+    def combinations(matrix: Matrix) -> Matrix:
         """
         Get the combinations of elements in the matrix
         returns: matrix of combinations
@@ -173,13 +174,13 @@ class Graph:
         returns: list of combinations of nodes that produces stocks needed by
             one of the process (parent) of the parent node
         """
-        matrices: list[list[NodeElem]] = []
+        matrices: Matrix = []
         for need, qty in self.process[parent_process.name].need.items():
             if stock.get(need, 1) >= qty:
                 continue
             matrices.append([NodeElem(p.name, ceil(qty / (p.result[need] + stock[need]))) for p in self.produces[need]])
         combinations = Node.combinations(matrices)
-        return [Node(lst, depth + 1, deepcopy(stock)) for lst in combinations]
+        return [Node(lst, deepcopy(stock), depth + 1) for lst in combinations]
 
     def get_children(self, parent: Node) -> list[Node]:
         """
@@ -188,16 +189,15 @@ class Graph:
         returns: list of combinations of nodes that produces stocks needed by
             all the processes in the parent node
         """
-        nodes_lists: list[list[Node]] = [self.get_process_children(process, parent.depth, parent.stock) for process in parent.process_list]
-        nodes_combinations = Node.combinations(nodes_lists)
-        children = [sum(nodes) for nodes in nodes_combinations]
-        parent.children = children
+        nodes_lists: Matrix = [self.get_process_children(process, parent.depth, parent.stock) for process in parent.process_list]
+        nodes_combinations: Matrix = Node.combinations(nodes_lists)
+        children: list[Node] = [sum(nodes) for nodes in nodes_combinations]
         return children
     
-    def get_sequences(self, max_cycle: int = 10000) -> list[list[Node]]:
+    def depth_first_search(self, current: Node, visited: set[str]) -> None:
         """
-        Get all paths of processes recursively
-        max_cycle: maximum number of cycles that a sequence of process can take
-        returns: list of all sequences of process that optimize the wanted stock
+        Perfoms DFS to find every sequence of process that will be stored in self.paths
+        current: the current node to explore
+        visited: a set of visited processes
         """
         pass

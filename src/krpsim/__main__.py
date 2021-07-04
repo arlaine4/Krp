@@ -37,6 +37,7 @@ if __name__ == '__main__':
     root = graph.get_root()
     children = graph.get_children(root)
     if options.verbose >= 2:
+        print(root)
         for node in children:
             print(node)
 
