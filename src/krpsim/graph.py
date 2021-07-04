@@ -49,13 +49,11 @@ class Node:
     """
     Collection of processes and stock
     list: list of tuple of process names and their number of executions
-    _depth: distance from starting process
     _stock: dict containing the state of the stock current node 
     """
 
     _process_list: list[NodeElem]
     _stock: dict[str, int]
-    _depth: int = 0
 
 
     @property
@@ -66,10 +64,6 @@ class Node:
     def stock(self) -> dict[str, int]:
         return self._stock
 
-    @property
-    def depth(self) -> int:
-        return self._depth
-
     @process_list.setter
     def process_list(self, value) -> None:
         self._process_list = value
@@ -78,24 +72,19 @@ class Node:
     def stock(self, value) -> None:
         self._stock = value
 
-    @depth.setter
-    def depth(self, value) -> None:
-        self._depth = value
-
     def __str__(self) -> str:
         
         string: str = f'{COLOR_BLUE}Processes{RESET_COLOR}: '
         for process in self.process_list:
             string += f'({process.name} * {process.times}) '
-        string += f'\n{COLOR_BLUE}Stocks{RESET_COLOR}: '
+        string += f'| {COLOR_BLUE}Stocks{RESET_COLOR}: '
         for name, qty in self.stock.items():
             if qty != 0:
                 string += f'({name}: {qty}) '
-        string += f'\n{COLOR_BLUE}Depth{RESET_COLOR}: {self.depth}'
         return string
 
     def __add__(self, other):
-        return Node([*self.process_list, *other.process_list], self.stock, self.depth)
+        return Node([*self.process_list, *other.process_list], self.stock)
 
     def __radd__(self, other):
         return self if other == 0 else self.__add__(other)
@@ -224,7 +213,7 @@ class Graph:
     def stocks_available(self, node: Node) -> bool:
         for node_elem in node.process_list:
             for need, qty in self.process[node_elem.name].need.items():
-                if qty < self.process[node_elem.name].need[need]:
+                if node.stock[need] <= 0 or qty < node.stock[need]:
                     return False
         return True
     
@@ -238,7 +227,7 @@ class Graph:
         root: list[Node] = [self.update_stocks(node) for node in _node_list]
         return root
 
-    def get_process_children(self, parent_process: NodeElem, depth: int, stock: dict[str, int]) -> list[Node]:
+    def get_process_children(self, parent_process: NodeElem, stock: dict[str, int]) -> list[Node]:
         """
         Get all possible nodes that produce stocks that is needed by parent
         returns: list of combinations of nodes that produces stocks needed by
@@ -249,8 +238,10 @@ class Graph:
             if stock.get(need, 1) >= qty:
                 continue
             matrices.append([NodeElem(p.name, ceil(qty / (p.result[need] + abs(stock[need])))) for p in self.produces[need]])
+        if not matrices:
+            return []
         combinations = Node.combinations(matrices)
-        return [Node(lst, deepcopy(stock), depth + 1) for lst in combinations]
+        return [Node(lst, deepcopy(stock)) for lst in combinations]
 
     def get_children(self, parent: Node) -> list[Node]:
         """
@@ -259,7 +250,7 @@ class Graph:
         returns: list of combinations of nodes that produces stocks needed by
             all the processes in the parent node
         """
-        nodes_lists: Matrix = [self.get_process_children(process, parent.depth, parent.stock) for process in parent.process_list]
+        nodes_lists: Matrix = [self.get_process_children(process, parent.stock) for process in parent.process_list]
         nodes_combinations: Matrix = Node.combinations(nodes_lists)
         _children: list[Node] = [sum(nodes) for nodes in nodes_combinations]
         children: list[Node] = [self.update_stocks(node) for node in _children]
@@ -270,11 +261,13 @@ class Graph:
         Perfoms DFS to find every sequence of process that will be stored in self.paths
         current: the current node to explore
         """
+        print(f'Depth {len(path)}')
         path.append(current)
         for child in self.get_children(current):
             if not self.stocks_available(child):
                 return self.depth_first_search(child, path)
-            self.paths.append(path)
+        print(f'Found Path #{len(self.paths)}')
+        self.paths.append(path)
         return None
 
     def start_dfs(self) -> None:
