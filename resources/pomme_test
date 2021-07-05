@@ -2,7 +2,7 @@
 #  krpsim tarte aux pommes
 #
 four:10
-euro:600
+euro:1000
 #
 buy_pomme:(euro:100):(pomme:700):200
 buy_citron:(euro:100):(citron:400):200

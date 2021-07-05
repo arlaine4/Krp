@@ -19,4 +19,5 @@ setup(
     license=license,
     packages=find_packages('src', exclude=('tests', 'docs')),
     python_requires=">=3.9",
+    install_requires=['numpy']
 )
