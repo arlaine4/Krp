@@ -1,5 +1,5 @@
 import unittest
-import krpsim.parsing as p
+import src.krpsim.parsing as p
 
 class Options:
     def __init__(self, delay, path, verbose):

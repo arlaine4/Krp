@@ -1,6 +1,6 @@
 import sys
 
-from krpsim.utils import split_need_result_delay, build_process_dic
+from src.krpsim.utils import split_need_result_delay, build_process_dic
 
 class Parser:
     """
