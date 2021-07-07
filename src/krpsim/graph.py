@@ -1,8 +1,9 @@
 from math import ceil
 import numpy as np
 from dataclasses import dataclass, field
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Optional
 from copy import deepcopy
+import itertools
 
 from krpsim.parsing import Process
 
@@ -42,6 +43,7 @@ class NodeElem:
 
     def __str__(self) -> str:
         return f'[{self.name} * {self.times}]'
+    
 
 
 @dataclass
@@ -210,12 +212,16 @@ class Graph:
                 node.stock[need] -= qty
         return node
 
-    def stocks_available(self, node: Node) -> bool:
+    def stocks_available(self, node: Node) -> Optional[bool]:
+        dead_end = True
+        available = True
         for node_elem in node.process_list:
             for need, qty in self.process[node_elem.name].need.items():
                 if node.stock[need] <= 0 or qty < node.stock[need]:
-                    return False
-        return True
+                    available = False
+                else:
+                    dead_end = False
+        return available if not dead_end else None
     
     def get_root(self) -> list[Node]:
         """
@@ -237,7 +243,7 @@ class Graph:
         for need, qty in self.process[parent_process.name].need.items():
             if stock.get(need, 1) >= qty:
                 continue
-            matrices.append([NodeElem(p.name, ceil(qty / (p.result[need] + abs(stock[need])))) for p in self.produces[need]])
+            matrices.append([NodeElem(p.name, 1) for p in self.produces[need]])
         if not matrices:
             return []
         combinations = Node.combinations(matrices)
@@ -261,13 +267,16 @@ class Graph:
         Perfoms DFS to find every sequence of process that will be stored in self.paths
         current: the current node to explore
         """
-        print(f'Depth {len(path)}')
         path.append(current)
         for child in self.get_children(current):
-            if not self.stocks_available(child):
+            path_found = self.stocks_available(child)
+            if path_found == True:
+                path.append(child)
+                return paths.append(path)
+            elif path_found == False:
                 return self.depth_first_search(child, path)
-        print(f'Found Path #{len(self.paths)}')
-        self.paths.append(path)
+            else:
+                return None
         return None
 
     def start_dfs(self) -> None:
